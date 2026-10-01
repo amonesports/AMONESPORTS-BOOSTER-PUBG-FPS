@@ -1,3 +1,2 @@
-# AMONESPORTS-BOOSTER-PUBG-FPS
-it is now in testing
-Test
+# AMONESPORTS-BOOSTER-ULTIMATE 
+It is public.
