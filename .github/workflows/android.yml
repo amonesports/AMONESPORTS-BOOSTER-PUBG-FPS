@@ -21,14 +21,16 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Check repository files
-      run: ls -la
-
-    - name: Build with Gradle (if android project exists)
+    - name: Generate Gradle Wrapper
       run: |
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-          ./gradlew assembleDebug
-        else
-          echo "Proiectul Android nativ complet lipsește din repository. Te rog să urci fișierele proiectului (app, build.gradle etc.)"
-        fi
+        gradle wrapper --gradle-version 8.5
+        chmod +x gradlew
+
+    - name: Build Debug APK with Gradle
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: pubgm-shizuku-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
