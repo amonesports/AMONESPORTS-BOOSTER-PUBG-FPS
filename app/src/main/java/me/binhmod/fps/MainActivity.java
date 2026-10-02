@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER);
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         layout.setBackgroundColor(Color.parseColor("#0F172A"));
 
         TextView title = new TextView(this);
-        title.setText("AMONESPORTS FPS");
+        title.setText("AMONKODE BOOSTER");
         title.setTextColor(Color.parseColor("#38BDF8"));
         title.setTextSize(24);
         title.setGravity(Gravity.CENTER);
@@ -35,24 +35,24 @@ public class MainActivity extends AppCompatActivity {
         layout.addView(title);
 
         Button btnStart = new Button(this);
-        btnStart.setText("PORNEȘTE FPS (ON)");
+        btnStart.setText("PORNEȘTE AMONKODE (ON)");
         btnStart.setBackgroundColor(Color.parseColor("#10B981"));
-        btnStart.setTextColor(Color.WHITE);
+        btnStart.setTextColor(Color.parseColor("#FFFFFF"));
         btnStart.setOnClickListener(v -> checkOverlayAndStart());
         layout.addView(btnStart);
 
         Button btnStop = new Button(this);
-        btnStop.setText("Oprește FPS (OFF)");
+        btnStop.setText("oprește AMONKODE (OFF)");
         btnStop.setBackgroundColor(Color.parseColor("#EF4444"));
-        btnStop.setTextColor(Color.WHITE);
+        btnStop.setTextColor(Color.parseColor("#FFFFFF"));
         btnStop.setOnClickListener(v -> {
-            stopService(new Intent(this, FPSService.class));
-            Toast.makeText(this, "Serviciul a fost oprit", Toast.LENGTH_SHORT).show();
+            stopService(new Intent(this, AmonKodeService.class));
+            Toast.makeText(this, "AmonKode a fost oprit!", Toast.LENGTH_SHORT).show();
         });
-        
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(0, 40, 0, 0);
         btnStop.setLayoutParams(params);
@@ -67,18 +67,18 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, REQ_OVERLAY);
         } else {
-            startFPS();
+            startAmonKode();
         }
     }
 
-    private void startFPS() {
-        Intent intent = new Intent(this, FPSService.class);
+    private void startAmonKode() {
+        Intent intent = new Intent(this, AmonKodeService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
         } else {
             startService(intent);
         }
-        Toast.makeText(this, "FPS Meter pornit!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "AmonKode pornit!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -86,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_OVERLAY) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
-                startFPS();
+                startAmonKode();
             } else {
-                Toast.makeText(this, "Permisiunea este necesară!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Permisiunea de suprapunere este necesară!", Toast.LENGTH_SHORT).show();
             }
         }
     }
