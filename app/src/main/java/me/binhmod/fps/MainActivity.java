@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
     private void showModeDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Select Method")
-                .setMessage("github.com/binhmod/FPSViewer")
+                .setMessage("AMONESPORTS FPS Meter")
                 .setPositiveButton("Shizuku (ADB)", (dialog, which) -> {
                     handleShizuku();
                 })
