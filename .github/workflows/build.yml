@@ -17,12 +17,13 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      env:
-        ANDROID_HOME: /usr/local/lib/android/sdk
       run: ./gradlew assembleDebug
 
     - name: Upload APK
