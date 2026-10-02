@@ -1,135 +1,94 @@
 package me.binhmod.fps;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
-import rikka.shizuku.Shizuku;
+import androidx.appcompat.app.AppCompatActivity;
 
-/**
- * MainActivity — Launcher:
- *  1. Checks SYSTEM_ALERT_WINDOW permission
- *  2. Prompt user to choose mode (Shizuku / Root)
- *  3. Starts FPSService and self-closes
- */
-public class MainActivity extends Activity {
-
-    private static final int REQ_OVERLAY = 101;
-    private static final int REQ_SHIZUKU = 100;
-
-    private Shizuku.OnRequestPermissionResultListener shizukuListener;
+public class MainActivity extends AppCompatActivity {
+    private static final int REQ_OVERLAY = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Cream un meniu simplu direct din cod
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setGravity(android.view.Gravity.CENTER);
+        layout.setPadding(50, 50, 50, 50);
+        layout.setBackgroundColor(android.graphics.Color.parseColor("#121212")); // Temă întunecată (Dark Theme)
 
-        // Step 1: Check overlay permission
-        if (!Settings.canDrawOverlays(this)) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Overlay Permission Required")
-                    .setMessage("FPS Viewer needs the 'Display over other apps' permission to function properly.")
-                    .setCancelable(false)
-                    .setPositiveButton("Grant", (d, w) -> {
-                        Intent intent = new Intent(
-                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                Uri.parse("package:" + getPackageName())
-                        );
-                        startActivityForResult(intent, REQ_OVERLAY);
-                    })
-                    .setNegativeButton("Cancel", (d, w) -> finish())
-                    .show();
-            return;
+        TextView title = new TextView(this);
+        title.setText("AMONESPORTS FPS Meter");
+        title.setTextColor(android.graphics.Color.WHITE);
+        title.setTextSize(22);
+        title.setGravity(android.view.Gravity.CENTER);
+        title.setPadding(0, 0, 0, 50);
+        layout.addView(title);
+
+        Button btnStart = new Button(this);
+        btnStart.setText("PORNEȘTE FPS (ON)");
+        btnStart.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"));
+        btnStart.setTextColor(android.graphics.Color.WHITE);
+        btnStart.setOnClickListener(v -> checkOverlayAndStart());
+        layout.addView(btnStart);
+
+        Button btnStop = new Button(this);
+        btnStop.setText("Oprește FPS (OFF)");
+        btnStop.setBackgroundColor(android.graphics.Color.parseColor("#F44336"));
+        btnStop.setTextColor(android.graphics.Color.WHITE);
+        btnStop.setPadding(0, 30, 0, 0);
+        btnStop.setOnClickListener(v -> {
+            stopService(new Intent(this, FPSService.class));
+            Toast.makeText(this, "Serviciul a fost oprit", Toast.LENGTH_SHORT).show();
+        });
+        // adăugăm spațiu între butoane
+        android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
+            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 30, 0, 0);
+        btnStop.setLayoutParams(params);
+        layout.addView(btnStop);
+
+        setContentView(layout);
+    }
+
+    private void checkOverlayAndStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQ_OVERLAY);
+        } else {
+            startFPS();
         }
+    }
 
-        showModeDialog();
+    private void startFPS() {
+        Intent intent = new Intent(this, FPSService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+        Toast.makeText(this, "FPS Meter pornit!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_OVERLAY) {
-            if (Settings.canDrawOverlays(this)) {
-                showModeDialog();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+                startFPS();
             } else {
-                Toast.makeText(this, "Permission denied. Cannot display overlay.", Toast.LENGTH_LONG).show();
-                finish();
+                Toast.makeText(this, "Este necesară permisiunea de afișare peste alte aplicații!", Toast.LENGTH_LONG).show();
             }
         }
-    }
-
-    private void showModeDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Select Method")
-                .setMessage("AMONESPORTS FPS Meter")
-                .setPositiveButton("Shizuku (ADB)", (dialog, which) -> {
-                    handleShizuku();
-                })
-                .setNeutralButton("Root (Magisk/KernelSU)", (dialog, which) -> {
-                    startFPSService(2);
-                })
-                .setNegativeButton("Cancel", (d, w) -> finish())
-                .setCancelable(false)
-                .show();
-    }
-
-    private void handleShizuku() {
-        // Check if Shizuku service is running
-        if (!Shizuku.pingBinder()) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Shizuku Not Running")
-                    .setMessage("Please start Shizuku first.\n\nDownload: shizuku.rikka.app")
-                    .setPositiveButton("OK", (d, w) -> finish())
-                    .show();
-            return;
-        }
-
-        // Permission already granted
-        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            startFPSService(1);
-            return;
-        }
-
-        // Request permission
-        shizukuListener = (requestCode, grantResult) -> {
-            if (shizukuListener != null) {
-                Shizuku.removeRequestPermissionResultListener(shizukuListener);
-                shizukuListener = null;
-            }
-
-            if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                startFPSService(1);
-            } else {
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Shizuku permission denied!", Toast.LENGTH_SHORT).show()
-                );
-                finish();
-            }
-        };
-
-        Shizuku.addRequestPermissionResultListener(shizukuListener);
-        Shizuku.requestPermission(REQ_SHIZUKU);
-    }
-
-    private void startFPSService(int mode) {
-        Intent i = new Intent(this, FPSService.class);
-        i.putExtra("mode", mode);
-        startService(i);
-
-        // Close after 300ms delay
-        getWindow().getDecorView().postDelayed(this::finish, 300);
-    }
-
-    @Override
-    protected void onDestroy() {
-        // Clean up listener to prevent memory leaks if destroyed early
-        if (shizukuListener != null) {
-            Shizuku.removeRequestPermissionResultListener(shizukuListener);
-            shizukuListener = null;
-        }
-        super.onDestroy();
     }
 }
