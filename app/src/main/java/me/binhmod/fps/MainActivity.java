@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,43 +16,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Cream un meniu simplu direct din cod
         android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
         layout.setOrientation(android.widget.LinearLayout.VERTICAL);
         layout.setGravity(android.view.Gravity.CENTER);
-        layout.setPadding(50, 50, 50, 50);
-        layout.setBackgroundColor(android.graphics.Color.parseColor("#121212")); // Temă întunecată (Dark Theme)
+        layout.setPadding(40, 40, 40, 40);
+        layout.setBackgroundColor(android.graphics.Color.parseColor("#0F172A")); // Dark Gaming Theme
 
-        TextView title = new TextView(this);
-        title.setText("AMONESPORTS FPS Meter");
-        title.setTextColor(android.graphics.Color.WHITE);
-        title.setTextSize(22);
+        android.widget.TextView title = new android.widget.TextView(this);
+        title.setText("AMONESPORTS FPS");
+        title.setTextColor(android.graphics.Color.parseColor("#38BDF8"));
+        title.setTextSize(24);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
         title.setGravity(android.view.Gravity.CENTER);
-        title.setPadding(0, 0, 0, 50);
+        title.setPadding(0, 0, 0, 60);
         layout.addView(title);
 
         Button btnStart = new Button(this);
         btnStart.setText("PORNEȘTE FPS (ON)");
-        btnStart.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"));
+        btnStart.setBackgroundColor(android.graphics.Color.parseColor("#10B981"));
         btnStart.setTextColor(android.graphics.Color.WHITE);
         btnStart.setOnClickListener(v -> checkOverlayAndStart());
         layout.addView(btnStart);
 
         Button btnStop = new Button(this);
         btnStop.setText("Oprește FPS (OFF)");
-        btnStop.setBackgroundColor(android.graphics.Color.parseColor("#F44336"));
+        btnStop.setBackgroundColor(android.graphics.Color.parseColor("#EF4444"));
         btnStop.setTextColor(android.graphics.Color.WHITE);
-        btnStop.setPadding(0, 30, 0, 0);
         btnStop.setOnClickListener(v -> {
             stopService(new Intent(this, FPSService.class));
             Toast.makeText(this, "Serviciul a fost oprit", Toast.LENGTH_SHORT).show();
         });
-        // adăugăm spațiu între butoane
+        
         android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
             android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
             android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, 30, 0, 0);
+        params.setMargins(0, 40, 0, 0);
         btnStop.setLayoutParams(params);
         layout.addView(btnStop);
 
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
                 startFPS();
             } else {
-                Toast.makeText(this, "Este necesară permisiunea de afișare peste alte aplicații!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Permisiunea de afișare este necesară!", Toast.LENGTH_LONG).show();
             }
         }
     }
